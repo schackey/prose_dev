@@ -14,6 +14,10 @@
 ? try photutils segmented detection, compare against skimage
 ? check difference between using Background2D and BackgroundAnnulus
 
-2.3.0:
-- merge
-- publish
+3.0.0:
+- save image as hdf5 with associated products
+- keep Observation?
+- Make full use of photutils.segmentation instead of skimage
+- Documentation make clearer argument type (like `~numpy.array`)
+- A clear documentation on image axes and angle orientation (like source.coord or source.orientation). Indeed this differs from numpy convention opposite from the way we usually deal with geometric points
+- use astropy lazy property
