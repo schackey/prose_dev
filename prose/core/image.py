@@ -583,7 +583,7 @@ def FITSImage(
     load_units: bool = True,
     load_data: bool = True,
     telescope: Telescope = None,
-) -> Image:
+):
     """Create an image from a FITS file
 
     Parameters
@@ -647,7 +647,7 @@ def FITSImage(
     image = Image(values, metadata, {})
     if image.metadata["jd"] is None:
         image.metadata["jd"] = Time(image.date).jd
-    image.fits_header = header
+    image.header = header
     image.wcs = WCS(header)
     image.telescope = telescope
 
