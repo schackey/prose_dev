@@ -274,6 +274,8 @@ class Source:
             a, b = 2 * r * self.a, 2 * r * self.b
         else:
             a, b = 2 * r, 2 * r * self.eccentricity
+        a = np.max([0.01, a])
+        b = np.max([0.01, b])
         return RectangularAperture(
             self.coords, float(np.abs(a)), float(np.abs(b)), self.orientation
         )
@@ -303,6 +305,11 @@ class Source:
         else:
             a0 = r0
             a1, b1 = r1, r1 * self.eccentricity
+
+        a0 = np.max([0.01, a0])
+        a1 = np.max([a0 + 0.001, a1])
+        b1 = np.max([0.01, b1])
+
         return RectangularAnnulus(self.coords, a0, a1, b1, theta=self.orientation)
 
     def fit_isophotes(self, debug=False):
@@ -490,18 +497,27 @@ class TraceSource(Source):
 
 @dataclass
 class Sources:
-    sources: Union[list, np.ndarray] = None
-    source_type: Literal["PointSource", None] = None
+    sources: list = None
+    """List of sources"""
+    type: Literal["PointSource", None] = None
+    """Source type"""
 
     def __post_init__(self):
         if self.sources is None:
             self.sources = []
 
-        if self.source_type is not None:
+        if isinstance(self.sources, np.ndarray):
+            if self.sources.dtype != object:
+                self.sources = [
+                    PointSource(coords=s, i=i) for i, s in enumerate(self.sources)
+                ]
+                self.type = "PointSource"
+
+        if self.type is not None:
             for s in self.sources:
                 assert (
-                    s.__class__.__name__ == self.source_type
-                ), f"list can only contain {self.source_type}"
+                    s.__class__.__name__ == self.type
+                ), f"list can only contain {self.type}"
         self.sources = np.array(self.sources)
 
     def __getitem__(self, i):
@@ -536,13 +552,13 @@ class Sources:
             source.coords = new_coord
 
     def apertures(self, r, scale=False):
-        if self.source_type == "PointSource":
+        if self.type == "PointSource":
             return CircularAperture(self.coords, r)
         else:
             return [source.aperture(r, scale=scale) for source in self.sources]
 
     def annulus(self, rin, rout, scale=False):
-        if self.source_type == "PointSource":
+        if self.type == "PointSource":
             return CircularAnnulus(self.coords, rin, rout)
         else:
             return [source.annulus(rin, rout, scale=scale) for source in self.sources]
