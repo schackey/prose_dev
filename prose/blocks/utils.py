@@ -441,6 +441,7 @@ class CleanBadPixels(Block):
 
     def run(self, image):
         image.data = self.clean(image.data.copy())
+        image.mask = self.bad_pixels_map.astype(bool)
 
 
 class Del(Block):
